@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 from scipy.sparse import csr_matrix
-from fastlapmap.similarities import fuzzy_simplicial_set_ann, CkNearestNeighbors
+from fastlapmap.similarities import fuzzy_simplicial_set_ann, cknn_graph, diffusion_harmonics
 from fastlapmap.ann import NMSlibTransformer
 
 def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jobs=1,
@@ -17,25 +17,49 @@ def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jo
     """
     Performs [Laplacian Eigenmaps](https://www2.imm.dtu.dk/projects/manifold/Papers/Laplacian.pdf) on the input data.
 
-
-    :param data: numpy.ndarray, pandas.DataFrame or scipy.sparse.csr_matrix
+    Parameters
+    ----------
+    data : numpy.ndarray, pandas.DataFrame or scipy.sparse.csr_matrix.
         Input data. If it is an array or a data frame, will use [hnswlib](https://github.com/nmslib/hnswlib) for approximate nearest-neighbors.
         If it is an sparse matrix, will use [nmslib](https://github.com/nmslib/nmslib) for approximate nearest-neighbors.
         Alternatively, users can provide an affinity matrix by stating `metric='precomputed'`.
-    :param n_eigs: number of eigenvectors to decompose the graph Laplacian into.
-    :param k: number of k-nearest-neighbors to use when computing affinities.
-    :param metric: which metric to use HNSWlib or NMSlib with. Defaults to 'cosine'.
-    :param similarity: which algorithm to use for similarity learning. Options are diffusion harmonics ('diffusion')
-        and fuzzy simplicial sets ('fuzzy'). Defaults to 'diffusion'.
-    :param n_jobs: how many threads to use in approximate-nearest-neighbors computation.
-    :param norm_laplacian: whether to renormalize the graph Laplacian. Default True.
-    :param expand: whether to expand the eigendecomposition until a discrete eigengap is found due to bit limit.
-    :param return_evals: whether to also return the eigenvalues in a tuple of eigenvectors, eigenvalues. Defaults to False.
 
-    :return:
-        If return_evals is True:
+    n_eigs : int (optional, default 10).
+     Number of eigenvectors to decompose the graph Laplacian into.
+
+    k : int (optional, default 10).
+        Number of k-nearest-neighbors to use when computing affinities.
+
+    metric : str (optional, default 'euclidean').
+        which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
+        Accepted metrics include:
+        -'sqeuclidean'
+        -'euclidean'
+        -'l1'
+        -'lp' - requires setting the parameter `p` - equivalent to minkowski distance
+        -'cosine'
+        -'angular'
+        -'negdotprod'
+        -'levenshtein'
+        -'hamming'
+        -'jaccard'
+        -'jansen-shan'
+
+    similarity : str (optional, default 'diffusion').
+        Which algorithm to use for similarity learning. Options are diffusion harmonics ('diffusion')
+        , fuzzy simplicial sets ('fuzzy') and continuous k-nearest-neighbors ('cknn').
+    n_jobs : int (optional, default 1)
+        How many threads to use in approximate-nearest-neighbors computation.
+    norm_laplacian : bool (optional, default True).
+        Whether to renormalize the graph Laplacian.
+    return_evals : bool (optional, default False).
+        Whether to also return the eigenvalues in a tuple of eigenvectors, eigenvalues. Defaults to False.
+
+    Returns
+    ----------
+        If return_evals is True :
             A tuple of eigenvectors and eigenvalues.
-        If return_evals is False:
+        If return_evals is False :
             An array of ranked eigenvectors.
 
     """
@@ -50,24 +74,15 @@ def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jo
                      'a scipy.sparse.csr_matrix for obtaining approximate nearest neighbors with \'nmslib\'.')
 
     if metric != 'precomputed':
-        if similarity != 'fuzzy':
-            knn = NMSlibTransformer(n_neighbors=k, metric=metric, n_jobs=n_jobs).fit_transform(data)
-            if similarity == 'diffusion':
-                median_k = np.floor(k / 2).astype(np.int)
-                adap_sd = np.zeros(np.shape(data)[0])
-                for i in np.arange(len(adap_sd)):
-                    adap_sd[i] = np.sort(knn.data[knn.indptr[i]: knn.indptr[i + 1]])[
-                        median_k - 1
-                        ]
-                x, y, dists = sparse.find(knn)
-                dists = dists / (adap_sd[x] + 1e-10)
-                W = csr_matrix((np.exp(-dists), (x, y)), shape=[N, N])
+        if similarity == 'diffusion':
+            W = diffusion_harmonics(data, n_neighbors=k, metric=metric, n_jobs=n_jobs)
         elif similarity == 'fuzzy':
-            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, n_jobs=n_jobs)
+            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, metric=metric, n_jobs=n_jobs)
             W = fuzzy_results[0]
-
-    # Enforce symmetry
-    W = (W + W.T) / 2
+        elif similarity == 'cknn':
+            W = cknn_graph(data, n_neighbors=k,metric=metric, n_jobs=n_jobs, include_self=True, is_sparse=True, return_adj=False)
+        # Enforce symmetry
+        W = (W + W.T) / 2
 
     laplacian, dd = sparse.csgraph.laplacian(W, normed=norm_laplacian,
                                       return_diag=True)

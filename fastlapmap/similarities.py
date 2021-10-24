@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix
+from fastlapmap.ann import NMSlibTransformer
+from scipy.sparse import find, coo_matrix, csr_matrix
 from sklearn.neighbors import NearestNeighbors
 
 from . import ann
@@ -475,9 +476,56 @@ def compute_membership_strengths(knn_indices, knn_dists, sigmas, rhos):
     return rows, cols, vals
 
 
+def diffusion_harmonics(X, n_neighbors=10, metric='euclidean', n_jobs=1):
+    """
 
+    Computes the diffusion potential between samples using an anisotropic diffusion method
+     (renormalized by median k-nearest-neighbor).
 
-def cknn_graph(X, n_neighbors=10, delta=1.0, metric='precomputed', t='inf',
+    Parameters
+    ----------
+    X : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
+
+    n_neighbors : int (optional, default 10).
+        How many neighbors to use for computations.
+    metric : str (optional, default 'euclidean').
+        which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
+        Accepted metrics include:
+        -'sqeuclidean'
+        -'euclidean'
+        -'l1'
+        -'lp' - requires setting the parameter `p` - equivalent to minkowski distance
+        -'cosine'
+        -'angular'
+        -'negdotprod'
+        -'levenshtein'
+        -'hamming'
+        -'jaccard'
+        -'jansen-shan'
+
+    n_jobs : int (optional, default 1).
+        How many threads to use in computations.
+
+    Returns
+    -------
+
+    W : an affinity matrix encoding diffusion potential between samples.
+
+    """
+    N = np.shape(X)[0]
+    knn = NMSlibTransformer(n_neighbors=n_neighbors, metric=metric, n_jobs=n_jobs).fit_transform(X)
+    median_k = np.floor(n_neighbors / 2).astype(np.int)
+    adap_sd = np.zeros(np.shape(X)[0])
+    for i in np.arange(len(adap_sd)):
+        adap_sd[i] = np.sort(knn.data[knn.indptr[i]: knn.indptr[i + 1]])[
+            median_k - 1
+            ]
+    x, y, dists = find(knn)
+    dists = dists / (adap_sd[x] + 1e-10)
+    W = csr_matrix((np.exp(-dists), (x, y)), shape=[N, N])
+    return W
+
+def cknn_graph(X, n_neighbors=10, delta=1.0, metric='euclidean', n_jobs=1, t='inf',
                  include_self=True, is_sparse=False, return_adj=True):
     """
     Continuous k-nearest-neighbors.  CkNN
@@ -486,31 +534,59 @@ def cknn_graph(X, n_neighbors=10, delta=1.0, metric='precomputed', t='inf',
     data. See the [CkNN manuscript](http://dx.doi.org/10.3934/fods.2019001) for details.
 
     Parameters
+    ----------
+    X : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
 
-        n_neighbors: int, optional, default=5
+    n_neighbors : int (optional, default 5)
             Number of neighbors to estimate the density around the point.
             It appeared as a parameter `k` in the paper.
-        delta: float, optional, default=1.0
+
+    delta : float (optional, default 1.0)
             A parameter to decide the radius for each points. The combination
-            radius increases in proportion to this parameter.
-        metric: str, optional, default='precomputed'
-            The metric of each points. This parameter depends on the parameter
-            `metric` of scipy.spatial.distance.pdist.
-        t: 'inf' or float or int, optional, default='inf'
+            radius increases in proportion to this parameter
+            .
+    metric : str (optional, default 'euclidean').
+        which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
+        Accepted metrics include:
+        -'sqeuclidean'
+        -'euclidean'
+        -'l1'
+        -'lp' - requires setting the parameter `p` - equivalent to minkowski distance
+        -'cosine'
+        -'angular'
+        -'negdotprod'
+        -'levenshtein'
+        -'hamming'
+        -'jaccard'
+        -'jansen-shan'
+
+    n_jobs : int (optional, default 1).
+        How many threads to use in computations.
+
+    t: 'inf' or float or int (optional, default='inf')
             The decay parameter of heat kernel. The weights are calculated as
             follow:
                 W_{ij} = exp(-(||x_{i}-x_{j}||^2)/t)
             For more infomation, read the paper 'Laplacian Eigenmaps for
             Dimensionality Reduction and Data Representation', Belkin, et. al.
-        include_self: bool, optional, default=True
+
+    include_self : bool (optional, default True).
             All diagonal elements are 1.0 if this parameter is True.
-        is_sparse: bool, optional, default=True
-            The method `cknneighbors_graph` returns csr_matrix object if this
-            parameter is True else returns ndarray object.
-        return_adj: bool, optional, default False
+
+    is_sparse : bool (optional, default True).
+            Returns a scipy.sparse.csr_matrix object if this
+            parameter is True. Otherwise, returns numpy.ndarray object.
+
+    return_adj : bool (optional, default False)
             Whether to return the adjacency matrix instead.
 
-        """
+    Returns
+    ----------
+
+    The affinity (or adjacency) matrix as a scipy.sparse.csr_matrix or numpy.ndarray object, depending on `is_sparse`
+        and on `return_adj`.
+
+    """
 
 
     n_samples = X.shape[0]
@@ -528,9 +604,8 @@ def cknn_graph(X, n_neighbors=10, delta=1.0, metric='precomputed', t='inf',
             raise ValueError("`X` must be square matrix")
         dmatrix = X
     else:
-        from sklearn.metrics.pairwise import pairwise_distances
-        dmatrix = pairwise_distances(X, metric=metric)
-
+        knn = NMSlibTransformer(n_neighbors=n_neighbors, metric=metric, n_jobs=n_jobs).fit_transform(X)
+        dmatrix = knn.toarray()
     darray_n_nbrs = np.partition(dmatrix, n_neighbors)[:, [n_neighbors]]
     # prevent approximately null results (div by 0)
     div_matrix = np.sqrt(darray_n_nbrs.dot(darray_n_nbrs.T)) + 1e-12
