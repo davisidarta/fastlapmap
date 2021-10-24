@@ -1,7 +1,9 @@
 import sys
 
-from . import ann
-from . import spectral
+from .ann import NMSlibTransformer as ApproxKNeighbors
+from .spectral import LapEigenmap
+from .similarities import fuzzy_simplicial_set_ann as fuzzy_similarity
+from .similarities import cknn_graph
 
-sys.modules.update({f'{__name__}.{m}': globals()[m] for m in ['ann', 'spectral']})
+sys.modules.update({f'{__name__}.{m}': globals()[m] for m in ['ApproxKNeighbors', 'LapEigenmap', 'fuzzy_similarity', 'cknn_graph']})
 

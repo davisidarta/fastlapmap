@@ -4,20 +4,22 @@
         
 # Fast Laplacian Eigenmaps in python
 
-Open-source Laplacian Eigenmaps for dimensionality reduction of large data in python. Comes with
- approximate-nearest-neighbors wrappers for [NMSlib](https://github.com/nmslib/nmslib) and [HNSWlib](https://github.com/nmslib/hnswlib).
-
-Performs around 12x faster than the default [scikit-learn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.SpectralEmbedding.html).    
+Open-source Laplacian Eigenmaps for dimensionality reduction of large data in python. Comes with an
+ wrapper for [NMSlib](https://github.com/nmslib/nmslib) to compute approximate-nearest-neighbors.
+Performs several times faster than the default [scikit-learn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.SpectralEmbedding.html).    
         
 # Installation
 
-You'll need NMSlib and HNSWlib for using this package, along with some basic libraries:
+You'll need NMSlib for using this package properly. Installing it with no binaries is recommended if your CPU supports
+ advanced instructions (it problably does): 
 
 ```
-pip3 install numpy pandas scikit-learn nmslib hnswlib
+pip3 install --no-binary :all: nmslib
+# Along with requirements:
+pip3 install numpy pandas scipy scikit-learn 
 ```
 
-Then you can install it with pip:
+Then you can install this package with pip:
 
 ```
 pip3 install fastlapmap

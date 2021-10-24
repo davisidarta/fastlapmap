@@ -17,7 +17,7 @@ def fuzzy_simplicial_set_ann(
         n_neighbors=15,
         knn_indices=None,
         knn_dists=None,
-        backend='hnswlib',
+        backend='nmslib',
         metric='cosine',
         n_jobs=None,
         efC=50,
@@ -45,9 +45,9 @@ def fuzzy_simplicial_set_ann(
         miss finer detail, while smaller values will focus on fine manifold
         structure to the detriment of the larger picture.
 
-    backend : str (optional, default 'hnwslib').
+    backend : str (optional, default 'nmslib').
         Which backend to use to compute nearest-neighbors. Options for fast, approximate nearest-neighbors
-        are 'hnwslib' (default) and 'nmslib'. For exact nearest-neighbors, use 'sklearn'.
+        are 'nmslib' (default) and 'hnswlib'. For exact nearest-neighbors, use 'sklearn'.
 
     metric : str (optional, default 'cosine').
         Distance metric for building an approximate kNN graph. Defaults to
@@ -477,25 +477,16 @@ def compute_membership_strengths(knn_indices, knn_dists, sigmas, rhos):
 
 
 
-def cknn_graph(X, n_neighbors, delta=1.0, metric='euclidean', t='inf',
-                       include_self=False, is_sparse=True,
-                       return_instance=False):
+def cknn_graph(X, n_neighbors=10, delta=1.0, metric='precomputed', t='inf',
+                 include_self=True, is_sparse=False, return_adj=True):
+    """
+    Continuous k-nearest-neighbors.  CkNN
+    is the unique unweighted construction that yields a geometry consistent with
+    the connected components of the underlying manifold in the limit of large
+    data. See the [CkNN manuscript](http://dx.doi.org/10.3934/fods.2019001) for details.
 
-    c_knn = CkNearestNeighbors(n_neighbors=n_neighbors, delta=delta,
-                              metric=metric, t=t, include_self=include_self,
-                              is_sparse=is_sparse)
-    graph = c_knn.cknneighbors_graph(X)
-    graph[(np.arange(graph.shape[0]), np.arange(graph.shape[0]))] = 0
+    Parameters
 
-    if return_instance:
-        return c_knn
-    else:
-        return graph
-
-def CkNearestNeighbors(X, n_neighbors=10, delta=1.0, metric='precomputed', t='inf',
-                 include_self=False, is_sparse=True):
-    """This object provides the all logic of CkNN.
-    Args:
         n_neighbors: int, optional, default=5
             Number of neighbors to estimate the density around the point.
             It appeared as a parameter `k` in the paper.
@@ -516,8 +507,8 @@ def CkNearestNeighbors(X, n_neighbors=10, delta=1.0, metric='precomputed', t='in
         is_sparse: bool, optional, default=True
             The method `cknneighbors_graph` returns csr_matrix object if this
             parameter is True else returns ndarray object.
-        return_adjacency: bool, optional, default=False
-            Whether to return the adjacency matrix instead of the estimated similarity.
+        return_adj: bool, optional, default False
+            Whether to return the adjacency matrix instead.
 
         """
 
@@ -556,15 +547,19 @@ def CkNearestNeighbors(X, n_neighbors=10, delta=1.0, metric='precomputed', t='in
     else:
         A[diag_ptr, diag_ptr] = False
 
-    if t == 'inf':
-        K = A.astype(np.float)
+    if return_adj:
+        return A
     else:
-        mask = A.nonzero()
-        weights = np.exp(-np.power(dmatrix[mask], 2)/t)
-        dmatrix[:] = 0.
-        dmatrix[mask] = weights
-        K = csr_matrix(dmatrix)
-    if not is_sparse:
-        K = K.toarray()
-    return K
+        if t == 'inf':
+            K = A.astype(np.float)
+        else:
+            mask = A.nonzero()
+            weights = np.exp(-np.power(dmatrix[mask], 2)/t)
+            dmatrix[:] = 0.
+            dmatrix[mask] = weights
+            K = csr_matrix(dmatrix)
+        if not is_sparse:
+            K = K.toarray()
+
+        return K
 

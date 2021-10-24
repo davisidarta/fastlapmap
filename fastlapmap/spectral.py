@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 from scipy.sparse import csr_matrix
-from fastlapmap.fuzzy import fuzzy_simplicial_set_ann, CkNearestNeighbors
-from fastlapmap.ann import HNSWlibTransformer, NMSlibTransformer
+from fastlapmap.similarities import fuzzy_simplicial_set_ann, CkNearestNeighbors
+from fastlapmap.ann import NMSlibTransformer
 
 def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jobs=1,
                 norm_laplacian=True, eigen_tol=10e-4, return_evals=False):
@@ -41,24 +41,17 @@ def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jo
     """
     N = np.shape(data)[0]
     if isinstance(data, np.ndarray):
-        backend = 'hnswlib'
+        data = csr_matrix(data)
     elif isinstance(data, pd.DataFrame):
         data = data.to_numpy()
-        backend = 'hnswlib'
-    elif isinstance(data, csr_matrix):
-        backend = 'nmslib'
+        data = csr_matrix(data)
     else:
-        return print('Data should be a numpy.ndarray or pandas.DataFrame for approximate-nearest-neighbors backend \'hnswlib\' and '
-                     'a scipy.sparse.csr_matrix for backend \'nmslib\'.')
+        return print('Data should be a numpy.ndarray,pandas.DataFrame or'
+                     'a scipy.sparse.csr_matrix for obtaining approximate nearest neighbors with \'nmslib\'.')
 
     if metric != 'precomputed':
         if similarity != 'fuzzy':
-            if backend == 'hnswlib':
-                knn = HNSWlibTransformer(n_neighbors=k, metric=metric, n_jobs=n_jobs).fit_transform(data)
-            elif backend == 'nmslib':
-                knn = NMSlibTransformer(n_neighbors=k, metric=metric, n_jobs=n_jobs).fit_transform(data)
-            else:
-                return print('Not implemented!')
+            knn = NMSlibTransformer(n_neighbors=k, metric=metric, n_jobs=n_jobs).fit_transform(data)
             if similarity == 'diffusion':
                 median_k = np.floor(k / 2).astype(np.int)
                 adap_sd = np.zeros(np.shape(data)[0])
@@ -70,9 +63,8 @@ def LapEigenmap(data, n_eigs=10, k=10, metric='cosine', similarity='fuzzy', n_jo
                 dists = dists / (adap_sd[x] + 1e-10)
                 W = csr_matrix((np.exp(-dists), (x, y)), shape=[N, N])
         elif similarity == 'fuzzy':
-            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, backend=backend, n_jobs=n_jobs)
+            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, n_jobs=n_jobs)
             W = fuzzy_results[0]
-
 
     # Enforce symmetry
     W = (W + W.T) / 2
