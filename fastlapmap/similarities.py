@@ -29,28 +29,32 @@ def fuzzy_simplicial_set_ann(
         apply_set_operations=True,
         return_dists=False,
         verbose=False):
-    """Given a set of data X, a neighborhood size, and a measure of distance
+    """
+    Given a set of data X, a neighborhood size, and a measure of distance
     compute the fuzzy simplicial set (here represented as a fuzzy graph in
     the form of a sparse matrix) associated to the data. This is done by
     locally approximating geodesic distance at each point, creating a fuzzy
     simplicial set for each such point, and then combining all the local
-    fuzzy simplicial sets into a global one via a fuzzy union.
+    fuzzy simplicial sets into a global one via a fuzzy union. This algorithm
+    was first implemented and made popular in [UMAP](https://arxiv.org/abs/1802.03426).
+
+    ----------
     Parameters
     ----------
-    X : array of shape (n_samples, n_features).
+    `X` : array of shape (n_samples, n_features).
         The data to be modelled as a fuzzy simplicial set.
 
-    n_neighbors : int.
+    `n_neighbors` : int.
         The number of neighbors to use to approximate geodesic distance.
         Larger numbers induce more global estimates of the manifold that can
         miss finer detail, while smaller values will focus on fine manifold
         structure to the detriment of the larger picture.
 
-    backend : str (optional, default 'nmslib').
+    `backend` : str (optional, default 'nmslib').
         Which backend to use to compute nearest-neighbors. Options for fast, approximate nearest-neighbors
         are 'nmslib' (default) and 'hnswlib'. For exact nearest-neighbors, use 'sklearn'.
 
-    metric : str (optional, default 'cosine').
+    `metric` : str (optional, default 'cosine').
         Distance metric for building an approximate kNN graph. Defaults to
         'cosine'. Users are encouraged to explore different metrics, such as 'euclidean' and 'inner_product'.
         The 'hamming' and 'jaccard' distances are also available for string vectors.
@@ -80,39 +84,39 @@ def fuzzy_simplicial_set_ann(
 
         -'jansen-shan' (*).
 
-    n_jobs : int (optional, default 1).
+    `n_jobs` : int (optional, default 1).
         number of threads to be used in computation. Defaults to 1. The algorithm is highly
         scalable to multi-threading.
 
-    M : int (optional, default 30).
+    `M` : int (optional, default 30).
         defines the maximum number of neighbors in the zero and above-zero layers during HSNW
         (Hierarchical Navigable Small World Graph). However, the actual default maximum number
         of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
         is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
         HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.
 
-    efC : int (optional, default 100).
+    `efC` : int (optional, default 100).
         A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
         and leads to higher accuracy of search. However this also leads to longer indexing times.
         A reasonable range for this parameter is 50-2000.
 
-    efS : int (optional, default 100).
+    `efS` : int (optional, default 100).
         A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
         expense of longer retrieval time. A reasonable range for this parameter is 50-2000.
 
-    knn_indices : array of shape (n_samples, n_neighbors) (optional).
+    `knn_indices` : array of shape (n_samples, n_neighbors) (optional).
         If the k-nearest neighbors of each point has already been calculated
         you can pass them in here to save computation time. This should be
         an array with the indices of the k-nearest neighbors as a row for
         each data point.
 
-    knn_dists : array of shape (n_samples, n_neighbors) (optional).
+    `knn_dists` : array of shape (n_samples, n_neighbors) (optional).
         If the k-nearest neighbors of each point has already been calculated
         you can pass them in here to save computation time. This should be
         an array with the distances of the k-nearest neighbors as a row for
         each data point.
 
-    set_op_mix_ratio : float (optional, default 1.0).
+    `set_op_mix_ratio` : float (optional, default 1.0).
         Interpolate between (fuzzy) union and intersection as the set operation
         used to combine local fuzzy simplicial sets to obtain a global fuzzy
         simplicial sets. Both fuzzy set operations use the product t-norm.
@@ -120,17 +124,17 @@ def fuzzy_simplicial_set_ann(
         1.0 will use a pure fuzzy union, while 0.0 will use a pure fuzzy
         intersection.
 
-    local_connectivity : int (optional, default 1)
+    `local_connectivity` : int (optional, default 1)
         The local connectivity required -- i.e. the number of nearest
         neighbors that should be assumed to be connected at a local level.
         The higher this value the more connected the manifold becomes
         locally. In practice this should be not more than the local intrinsic
         dimension of the manifold.
 
-    verbose : bool (optional, default False)
+    `verbose` : bool (optional, default False)
         Whether to report information on the current progress of the algorithm.
 
-    return_dists : bool or None (optional, default none)
+    `return_dists` : bool or None (optional, default none)
         Whether to return the pairwise distance associated with each edge.
 
     Returns
@@ -200,11 +204,10 @@ def fuzzy_simplicial_set_ann(
 def approximate_n_neighbors(data,
                             n_neighbors=15,
                             metric='cosine',
-                            backend='hnswlib',
                             n_jobs=10,
-                            efC=50,
-                            efS=50,
-                            M=15,
+                            efC=20,
+                            efS=20,
+                            M=10,
                             p=11/16,
                             dense=False,
                             verbose=False
@@ -213,10 +216,9 @@ def approximate_n_neighbors(data,
     Simple function using NMSlibTransformer from topodata.ann. This implements a very fast
     and scalable approximate k-nearest-neighbors graph on spaces defined by nmslib.
     Read more about nmslib and its various available metrics at
-    https://github.com/nmslib/nmslib. Read more about dbMAP at
-    https://github.com/davisidarta/dbMAP.
+    https://github.com/nmslib/nmslib.
 
-
+    ----------
     Parameters
     ----------
     n_neighbors : number of nearest-neighbors to look for. In practice,
@@ -281,6 +283,10 @@ def approximate_n_neighbors(data,
            https://arxiv.org/abs/1603.09320. HSNW is implemented in python via NMSLIB. Please check
            more about NMSLIB at https://github.com/nmslib/nmslib .
 
+    `verbose` : bool (optional, default False).
+        Whether to report information on the current progress of the algorithm.
+
+    -------------
     Returns
     -------------
      k-nearest-neighbors indices and distances. Can be customized to also return
@@ -293,14 +299,9 @@ def approximate_n_neighbors(data,
 
 
     """
-    if backend == 'hnswlib' and metric not in ['euclidean', 'sqeuclidean', 'cosine', 'inner_product']:
-        if verbose:
-            print('Metric ' + str(
-                metric) + ' not compatible with \'hnslib\' backend. Changing to \'nmslib\' backend.')
-        backend = 'nmslib'
-    if backend == 'nmslib':
-        # Construct an approximate k-nearest-neighbors graph
-        anbrs = ann.NMSlibTransformer(n_neighbors=n_neighbors,
+
+    # Construct an approximate k-nearest-neighbors graph
+    anbrs = NMSlibTransformer(n_neighbors=n_neighbors,
                                       metric=metric,
                                       p=p,
                                       method='hnsw',
@@ -310,21 +311,7 @@ def approximate_n_neighbors(data,
                                       efS=efS,
                                       dense=dense,
                                       verbose=verbose).fit(data)
-        knn_inds, knn_distances, grad, knn_graph = anbrs.ind_dist_grad(data)
-    elif backend == 'hnwslib':
-        anbrs = ann.HNSWlibTransformer(n_neighbors=n_neighbors,
-                                       metric=metric,
-                                       n_jobs=n_jobs,
-                                       M=M,
-                                       efC=efC,
-                                       efS=efS,
-                                       verbose=verbose).fit(data)
-        knn_inds, knn_distances, grad, knn_graph = anbrs.ind_dist_grad(data)
-    else:
-        # Construct a k-nearest-neighbors graph
-        nbrs = NearestNeighbors(n_neighbors=int(n_neighbors), metric=metric, n_jobs=n_jobs).fit(
-            data)
-        knn_distances, knn_inds = nbrs.kneighbors(data)
+    knn_inds, knn_distances, grad, knn_graph = anbrs.ind_dist_grad(data)
 
     return knn_inds, knn_distances
 
@@ -336,6 +323,7 @@ def smooth_knn_dist(distances, k, n_iter=16, local_connectivity=1.0, bandwidth=1
     k values rather than requiring an integral k. In essence we are simply
     computing the distance such that the cardinality of fuzzy set we generate
     is k.
+
     Parameters
     ----------
     distances: array of shape (n_samples, n_neighbors)
@@ -476,19 +464,21 @@ def compute_membership_strengths(knn_indices, knn_dists, sigmas, rhos):
     return rows, cols, vals
 
 
-def diffusion_harmonics(X, n_neighbors=10, metric='euclidean', n_jobs=1):
+def diffusion_harmonics(X, n_neighbors=10, metric='euclidean', n_jobs=1, efC=20, efS=20, M=10, p=11/16, verbose=False):
     """
 
-    Computes the diffusion potential between samples using an anisotropic diffusion method
+    Computes the [diffusion potential](https://doi.org/10.1073/pnas.0500334102) between samples using an anisotropic diffusion method
      (renormalized by median k-nearest-neighbor).
 
+    ----------
     Parameters
     ----------
-    X : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
+    `X` : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
 
-    n_neighbors : int (optional, default 10).
+    `n_neighbors` : int (optional, default 10).
         How many neighbors to use for computations.
-    metric : str (optional, default 'euclidean').
+
+    `metric` : str (optional, default 'euclidean').
         which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
         Accepted metrics include:
         -'sqeuclidean'
@@ -503,17 +493,50 @@ def diffusion_harmonics(X, n_neighbors=10, metric='euclidean', n_jobs=1):
         -'jaccard'
         -'jansen-shan'
 
-    n_jobs : int (optional, default 1).
-        How many threads to use in computations.
+    `p` : int or float (optional, default 11/16 )
+        P for the Lp metric, when ``metric='lp'``.  Can be fractional. The default 11/16 approximates
+        an astroid norm with some computational efficiency (2^n bases are less painstakinly slow to compute).
+        See https://en.wikipedia.org/wiki/Lp_space for some context.
 
+    `n_jobs` : int (optional, default 1).
+        number of threads to be used in computation. Defaults to 1. The algorithm is highly
+        scalable to multi-threading.
+
+    `M` : int (optional, default 10).
+        defines the maximum number of neighbors in the zero and above-zero layers during HSNW
+        (Hierarchical Navigable Small World Graph). However, the actual default maximum number
+        of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
+        is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
+        HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.
+
+    `efC` : int (optional, default 20).
+        A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
+        and leads to higher accuracy of search. However this also leads to longer indexing times.
+        A reasonable range for this parameter is 10-500.
+
+    `efS` : int (optional, default 100).
+        A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
+        expense of longer retrieval time. A reasonable range for this parameter is 10-500.
+
+    `verbose` : bool (optional, default False).
+        Whether to report information on the current progress of the algorithm.
+
+    ----------
     Returns
     -------
 
-    W : an affinity matrix encoding diffusion potential between samples.
+    `W` : an affinity matrix encoding diffusion potential between samples.
 
     """
     N = np.shape(X)[0]
-    knn = NMSlibTransformer(n_neighbors=n_neighbors, metric=metric, n_jobs=n_jobs).fit_transform(X)
+    knn = NMSlibTransformer(n_neighbors=n_neighbors,
+                            metric=metric,
+                            p=p,
+                            n_jobs=n_jobs,
+                            M=M,
+                            efC=efC,
+                            efS=efS,
+                            verbose=verbose).fit_transform(X)
     median_k = np.floor(n_neighbors / 2).astype(np.int)
     adap_sd = np.zeros(np.shape(X)[0])
     for i in np.arange(len(adap_sd)):
@@ -525,27 +548,28 @@ def diffusion_harmonics(X, n_neighbors=10, metric='euclidean', n_jobs=1):
     W = csr_matrix((np.exp(-dists), (x, y)), shape=[N, N])
     return W
 
-def cknn_graph(X, n_neighbors=10, delta=1.0, metric='euclidean', n_jobs=1, t='inf',
-                 include_self=True, is_sparse=False, return_adj=True):
+def cknn_graph(X, n_neighbors=10, delta=1.0, metric='euclidean', n_jobs=1, efC=20, efS=20, M=10, p=11/16, t='inf',
+                 include_self=True, is_sparse=False, return_adj=True, verbose=False):
     """
     Continuous k-nearest-neighbors.  CkNN
     is the unique unweighted construction that yields a geometry consistent with
     the connected components of the underlying manifold in the limit of large
     data. See the [CkNN manuscript](http://dx.doi.org/10.3934/fods.2019001) for details.
 
+    ----------
     Parameters
     ----------
-    X : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
+    `X` : input data. May be a numpy.ndarray, a pandas.DataFrame or a scipy.sparse.csr_matrix.numpy
 
-    n_neighbors : int (optional, default 5)
+    `n_neighbors` : int (optional, default 5)
             Number of neighbors to estimate the density around the point.
             It appeared as a parameter `k` in the paper.
 
-    delta : float (optional, default 1.0)
+    `delta` : float (optional, default 1.0)
             A parameter to decide the radius for each points. The combination
             radius increases in proportion to this parameter
             .
-    metric : str (optional, default 'euclidean').
+    `metric` : str (optional, default 'euclidean').
         which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
         Accepted metrics include:
         -'sqeuclidean'
@@ -560,26 +584,46 @@ def cknn_graph(X, n_neighbors=10, delta=1.0, metric='euclidean', n_jobs=1, t='in
         -'jaccard'
         -'jansen-shan'
 
-    n_jobs : int (optional, default 1).
-        How many threads to use in computations.
+    `n_jobs` : int (optional, default 1).
+        number of threads to be used in computation. Defaults to 1. The algorithm is highly
+        scalable to multi-threading.
 
-    t: 'inf' or float or int (optional, default='inf')
+    `M` : int (optional, default 10).
+        defines the maximum number of neighbors in the zero and above-zero layers during HSNW
+        (Hierarchical Navigable Small World Graph). However, the actual default maximum number
+        of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
+        is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
+        HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.
+
+    `efC` : int (optional, default 20).
+        A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
+        and leads to higher accuracy of search. However this also leads to longer indexing times.
+        A reasonable range for this parameter is 10-500.
+
+    `efS` : int (optional, default 100).
+        A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
+        expense of longer retrieval time. A reasonable range for this parameter is 10-500.
+
+    `t` : 'inf' or float or int (optional, default='inf')
             The decay parameter of heat kernel. The weights are calculated as
             follow:
                 W_{ij} = exp(-(||x_{i}-x_{j}||^2)/t)
             For more infomation, read the paper 'Laplacian Eigenmaps for
             Dimensionality Reduction and Data Representation', Belkin, et. al.
 
-    include_self : bool (optional, default True).
+    `include_self` : bool (optional, default True).
             All diagonal elements are 1.0 if this parameter is True.
 
-    is_sparse : bool (optional, default True).
+    `is_sparse` : bool (optional, default True).
             Returns a scipy.sparse.csr_matrix object if this
             parameter is True. Otherwise, returns numpy.ndarray object.
 
-    return_adj : bool (optional, default False)
+    `return_adj` : bool (optional, default False)
             Whether to return the adjacency matrix instead.
 
+    `verbose` : bool (optional, default False).
+        Whether to report information on the current progress of the algorithm.
+    ----------
     Returns
     ----------
 
@@ -604,7 +648,14 @@ def cknn_graph(X, n_neighbors=10, delta=1.0, metric='euclidean', n_jobs=1, t='in
             raise ValueError("`X` must be square matrix")
         dmatrix = X
     else:
-        knn = NMSlibTransformer(n_neighbors=n_neighbors, metric=metric, n_jobs=n_jobs).fit_transform(X)
+        knn = NMSlibTransformer(n_neighbors=n_neighbors,
+                                metric=metric,
+                                p=p,
+                                n_jobs=n_jobs,
+                                M=M,
+                                efC=efC,
+                                efS=efS,
+                                verbose=verbose).fit_transform(X)
         dmatrix = knn.toarray()
     darray_n_nbrs = np.partition(dmatrix, n_neighbors)[:, [n_neighbors]]
     # prevent approximately null results (div by 0)

@@ -4,7 +4,7 @@
         
 # Fast Laplacian Eigenmaps in python
 
-Open-source Laplacian Eigenmaps for dimensionality reduction of large data in python. Comes with an
+Open-source [Laplacian Eigenmaps](https://www2.imm.dtu.dk/projects/manifold/Papers/Laplacian.pdf) for dimensionality reduction of large data in python. Comes with an
  wrapper for [NMSlib](https://github.com/nmslib/nmslib) to compute approximate-nearest-neighbors.
 Performs several times faster than the default [scikit-learn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.SpectralEmbedding.html).    
         
@@ -38,26 +38,25 @@ Note that this implementation contains two similarity-learning algorithms: [anis
 
 ```
 # Import libraries
-# Fastlapmap and Sklearn Lap Eigenmap comparison
-
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.manifold import SpectralEmbedding
-from fastlapmap.spectral import LapEigenmap
-from sklearn.datasets import load_digits
+from fastlapmap import LapEigenmap
 
+# Load some data
+from sklearn.datasets import load_digits
 digits = load_digits()
 data = digits.data
 
-from scipy.sparse import csr_matrix
+# Define hyperparameters
 N_EIGS=2
 N_NEIGHBORS=10
 N_JOBS=10
 
 sk_se = SpectralEmbedding(n_components=N_EIGS, n_neighbors=N_NEIGHBORS, n_jobs=N_JOBS).fit_transform(data)
 
-flapmap_diff = LapEigenmap(data, n_eigs=2, metric='euclidean', similarity='diffusion', norm_laplacian=True, k=N_NEIGHBORS, n_jobs=N_JOBS)
-flapmap_fuzzy = LapEigenmap(data, n_eigs=2, metric='euclidean', similarity='fuzzy', norm_laplacian=True, k=N_NEIGHBORS, n_jobs=N_JOBS)
+flapmap_diff = LapEigenmap(data, n_eigs=2, similarity='diffusion', norm_laplacian=True, k=N_NEIGHBORS, n_jobs=N_JOBS)
+flapmap_fuzzy = LapEigenmap(data, n_eigs=2, similarity='fuzzy', norm_laplacian=True, k=N_NEIGHBORS, n_jobs=N_JOBS)
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 fig.suptitle('Handwritten digits data:', fontsize=24)

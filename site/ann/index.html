@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Approximate nearest-neighbors - Fast Laplacian Eigenmaps</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Approximate nearest-neighbors";
+    var mkdocs_page_input_path = "ann.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Fast Laplacian Eigenmaps</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Welcome!</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../le/">Laplacian Eigenmaps</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="#">Similarity learning</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="./">Approximate nearest-neighbors</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer--parameters">Parameters</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer--returns">Returns</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer--example">Example</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer.fit_transform">fit_transform()</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer.fit_transform--parameters">Parameters</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer.fit_transform--returns">Returns</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer.test_efficiency">test_efficiency()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fastlapmap.ann.NMSlibTransformer.update_search">update_search()</a>
+    </li>
+    </ul>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../diffusion/">Diffusion harmonics</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../fuzzy/">Fuzzy simplicial sets</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cknn/">Continuous k-nearest-neighbors</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmark</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Fast Laplacian Eigenmaps</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Similarity learning &raquo;</li>
+        
+      
+        
+          <li>API &raquo;</li>
+        
+      
+    
+    <li>Approximate nearest-neighbors</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <div class="doc doc-object doc-class">
+
+
+
+<h2 id="fastlapmap.ann.NMSlibTransformer" class="doc doc-heading">
+        <code>fastlapmap.ann.NMSlibTransformer</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>Wrapper for using nmslib as sklearn's KNeighborsTransformer. This implements
+an escalable approximate k-nearest-neighbors graph on spaces defined by nmslib.
+Read more about nmslib and its various available metrics at the original <a href="https://github.com/nmslib/nmslib.">repository</a></p>
+<p>Calling <code>nbrs = NMSlibTransformer()</code> initializes the class with default
+ neighbour search parameters.</p>
+<hr />
+<h4 id="fastlapmap.ann.NMSlibTransformer--parameters">Parameters</h4>
+<p><code>n_neighbors</code> : int (optional, default 30)
+    number of nearest-neighbors to look for. In practice,
+    this should be considered the average neighborhood size and thus vary depending
+    on your number of features, samples and data intrinsic dimensionality. Reasonable values
+    range from 5 to 100. Smaller values tend to lead to increased graph structure
+    resolution, but users should beware that a too low value may render granulated and vaguely
+    defined neighborhoods that arise as an artifact of downsampling. Defaults to 30. Larger
+    values can slightly increase computational time.</p>
+<p><code>metric</code> : str (optional, default 'cosine').
+    Accepted NMSLIB metrics. Defaults to 'cosine'. Accepted metrics include:
+    -'sqeuclidean'
+    -'euclidean'
+    -'l1'
+    -'lp' - requires setting the parameter <code>p</code> - equivalent to minkowski distance
+    -'cosine'
+    -'angular'
+    -'negdotprod'
+    -'levenshtein'
+    -'hamming'
+    -'jaccard'
+    -'jansen-shan'</p>
+<p><code>method</code> : str (optional, default 'hsnw').
+    approximate-neighbor search method. Available methods include:
+            -'hnsw' : a Hierarchical Navigable Small World Graph.
+            -'sw-graph' : a Small World Graph.
+            -'vp-tree' : a Vantage-Point tree with a pruning rule adaptable to non-metric distances.
+            -'napp' : a Neighborhood APProximation index.
+            -'simple_invindx' : a vanilla, uncompressed, inverted index, which has no parameters.
+            -'brute_force' : a brute-force search, which has no parameters.
+    'hnsw' is usually the fastest method, followed by 'sw-graph' and 'vp-tree'.</p>
+<p><code>n_jobs</code> : int (optional, default 1).
+    number of threads to be used in computation. Defaults to 1. The algorithm is highly
+    scalable to multi-threading.</p>
+<p><code>M</code> : int (optional, default 10).
+    defines the maximum number of neighbors in the zero and above-zero layers during HSNW
+    (Hierarchical Navigable Small World Graph). However, the actual default maximum number
+    of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
+    is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
+    HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.</p>
+<p><code>efC</code> : int (optional, default 20).
+    A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
+    and leads to higher accuracy of search. However this also leads to longer indexing times.
+    A reasonable range for this parameter is 10-500.</p>
+<p><code>efS</code> : int (optional, default 100).
+    A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
+    expense of longer retrieval time. A reasonable range for this parameter is 10-500.</p>
+<p><code>dense</code> : bool (optional, default False).
+    Whether to force the algorithm to use dense data, such as np.ndarrays and pandas DataFrames.</p>
+<hr />
+<h4 id="fastlapmap.ann.NMSlibTransformer--returns">Returns</h4>
+<p>Class for really fast approximate-nearest-neighbors search.</p>
+<hr />
+<h4 id="fastlapmap.ann.NMSlibTransformer--example">Example</h4>
+<pre><code>import numpy as np
+from sklearn.datasets import load_digits
+from scipy.sparse import csr_matrix
+from topo.base.ann import NMSlibTransformer
+#
+# Load the MNIST digits data, convert to sparse for speed
+digits = load_digits()
+data = csr_matrix(digits)
+#
+# Start class with parameters
+nn = NMSlibTransformer()
+nn = nn.fit(data)
+#
+# Obtain kNN graph
+knn = nn.transform(data)
+#
+# Obtain kNN indices, distances and distance gradient
+ind, dist, grad = nn.ind_dist_grad(data)
+#
+# Test for recall efficiency during approximate nearest neighbors search
+test = nn.test_efficiency(data)
+</code></pre>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fastlapmap.ann.NMSlibTransformer.fit_transform" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Fit to data, then transform it.</p>
+<p>Fits transformer to X and y with optional parameters fit_params
+and returns a transformed version of X.</p>
+<h5 id="fastlapmap.ann.NMSlibTransformer.fit_transform--parameters">Parameters</h5>
+<p>X : {array-like, sparse matrix, dataframe} of shape                 (n_samples, n_features)</p>
+<p>y : ndarray of shape (n_samples,), default=None
+    Target values.</p>
+<p>**fit_params : dict
+    Additional fit parameters.</p>
+<h5 id="fastlapmap.ann.NMSlibTransformer.fit_transform--returns">Returns</h5>
+<p>X_new : ndarray array of shape (n_samples, n_features_new)
+    Transformed array.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>fastlapmap/ann.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fastlapmap.ann.NMSlibTransformer.test_efficiency" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">test_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_use</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Test if NMSlibTransformer and KNeighborsTransformer give same results</p>
+
+        <details class="quote">
+          <summary>Source code in <code>fastlapmap/ann.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_use</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Test if NMSlibTransformer and KNeighborsTransformer give same results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">data_use</span> <span class="o">=</span> <span class="n">data_use</span>
+
+    <span class="n">query_qty</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="p">(</span><span class="n">dismiss</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_use</span><span class="p">)</span>
+    <span class="n">query_time_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;efSearch&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">efS</span><span class="p">}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting query-time parameters&#39;</span><span class="p">,</span> <span class="n">query_time_params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmslib_</span><span class="o">.</span><span class="n">setQueryTimeParams</span><span class="p">(</span><span class="n">query_time_params</span><span class="p">)</span>
+
+    <span class="c1"># For compatibility reasons, as each sample is considered as its own</span>
+    <span class="c1"># neighbor, one extra neighbor will be computed.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">ann_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmslib_</span><span class="o">.</span><span class="n">knnQueryBatch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span>
+                                             <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;kNN time total=</span><span class="si">%f</span><span class="s1"> (sec), per query=</span><span class="si">%f</span><span class="s1"> (sec), per query adjusted for thread number=</span><span class="si">%f</span><span class="s1"> (sec)&#39;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">query_qty</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">query_qty</span><span class="p">))</span>
+
+    <span class="c1"># Use sklearn for exact neighbor search</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">nbrs</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span>
+                            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span>
+                            <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;brute&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">knn</span> <span class="o">=</span> <span class="n">nbrs</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;brute-force gold-standart kNN time total=</span><span class="si">%f</span><span class="s1"> (sec), per query=</span><span class="si">%f</span><span class="s1"> (sec)&#39;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">query_qty</span><span class="p">))</span>
+
+    <span class="n">recall</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">query_qty</span><span class="p">):</span>
+        <span class="n">correct_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">knn</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">ret_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ann_results</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">recall</span> <span class="o">=</span> <span class="n">recall</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correct_set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">ret_set</span><span class="p">)))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">correct_set</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">recall</span> <span class="o">/</span> <span class="n">query_qty</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;kNN recall </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">recall</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fastlapmap.ann.NMSlibTransformer.update_search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">update_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Updates number of neighbors for kNN distance computation.
+Parameters</p>
+<hr />
+<p>n_neighbors: New number of neighbors to look for.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>fastlapmap/ann.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates number of neighbors for kNN distance computation.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    n_neighbors: New number of neighbors to look for.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">n_neighbors</span>
+    <span class="k">return</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Updated neighbor search.&#39;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../diffusion/" class="btn btn-neutral float-right" title="Diffusion harmonics">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../le/" class="btn btn-neutral" title="Laplacian Eigenmaps"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../le/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../diffusion/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

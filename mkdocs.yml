@@ -1,0 +1,28 @@
+site_name: Fast Laplacian Eigenmaps
+nav:
+    - Welcome!: index.md
+    - Usage: usage.md
+    - API:
+          - Laplacian Eigenmaps: le.md
+          - Similarity learning:
+                - Approximate nearest-neighbors: ann.md
+                - Diffusion harmonics: diffusion.md
+                - Fuzzy simplicial sets: fuzzy.md
+                - Continuous k-nearest-neighbors: cknn.md
+    - Benchmark: benchmark.md
+
+
+
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - python
+        - bash
+    icon:
+        logo: img/logo.png
+
+
+plugins:
+- search
+- mkdocstrings

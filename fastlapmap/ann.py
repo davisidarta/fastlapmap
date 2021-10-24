@@ -18,13 +18,16 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
     """
     Wrapper for using nmslib as sklearn's KNeighborsTransformer. This implements
     an escalable approximate k-nearest-neighbors graph on spaces defined by nmslib.
-    Read more about nmslib and its various available metrics at
-    https://github.com/nmslib/nmslib.
-    Calling 'nn <- NMSlibTransformer()' initializes the class with default
+    Read more about nmslib and its various available metrics at the original [repository](https://github.com/nmslib/nmslib.)
+
+    Calling ```nbrs = NMSlibTransformer()``` initializes the class with default
      neighbour search parameters.
+
+
+    ----------
     Parameters
     ----------
-    n_neighbors : int (optional, default 30)
+    `n_neighbors` : int (optional, default 30)
         number of nearest-neighbors to look for. In practice,
         this should be considered the average neighborhood size and thus vary depending
         on your number of features, samples and data intrinsic dimensionality. Reasonable values
@@ -33,7 +36,7 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
         defined neighborhoods that arise as an artifact of downsampling. Defaults to 30. Larger
         values can slightly increase computational time.
 
-    metric : str (optional, default 'cosine').
+    `metric` : str (optional, default 'cosine').
         Accepted NMSLIB metrics. Defaults to 'cosine'. Accepted metrics include:
         -'sqeuclidean'
         -'euclidean'
@@ -47,7 +50,7 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
         -'jaccard'
         -'jansen-shan'
 
-    method : str (optional, default 'hsnw').
+    `method` : str (optional, default 'hsnw').
         approximate-neighbor search method. Available methods include:
                 -'hnsw' : a Hierarchical Navigable Small World Graph.
                 -'sw-graph' : a Small World Graph.
@@ -57,34 +60,40 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
                 -'brute_force' : a brute-force search, which has no parameters.
         'hnsw' is usually the fastest method, followed by 'sw-graph' and 'vp-tree'.
 
-    n_jobs : int (optional, default 1).
+    `n_jobs` : int (optional, default 1).
         number of threads to be used in computation. Defaults to 1. The algorithm is highly
         scalable to multi-threading.
 
-    M : int (optional, default 30).
+    `M` : int (optional, default 10).
         defines the maximum number of neighbors in the zero and above-zero layers during HSNW
         (Hierarchical Navigable Small World Graph). However, the actual default maximum number
         of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
         is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
         HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.
 
-    efC : int (optional, default 100).
+    `efC` : int (optional, default 20).
         A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
         and leads to higher accuracy of search. However this also leads to longer indexing times.
-        A reasonable range for this parameter is 50-2000.
+        A reasonable range for this parameter is 10-500.
 
-    efS : int (optional, default 100).
+    `efS` : int (optional, default 100).
         A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
-        expense of longer retrieval time. A reasonable range for this parameter is 100-2000.
+        expense of longer retrieval time. A reasonable range for this parameter is 10-500.
 
-    dense : bool (optional, default False).
+    `dense` : bool (optional, default False).
         Whether to force the algorithm to use dense data, such as np.ndarrays and pandas DataFrames.
 
+    ----------
     Returns
     ---------
     Class for really fast approximate-nearest-neighbors search.
+
+
+
+    ----------
     Example
     -------------
+    ```
     import numpy as np
     from sklearn.datasets import load_digits
     from scipy.sparse import csr_matrix
@@ -106,6 +115,7 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
     #
     # Test for recall efficiency during approximate nearest neighbors search
     test = nn.test_efficiency(data)
+    ```
     """
 
     def __init__(self,

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Laplacian Eigenmaps - Fast Laplacian Eigenmaps</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Laplacian Eigenmaps";
+    var mkdocs_page_input_path = "le.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Fast Laplacian Eigenmaps</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Welcome!</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Laplacian Eigenmaps</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#fastlapmap.spectral.LapEigenmap--parameters">Parameters</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#fastlapmap.spectral.LapEigenmap--returns">Returns</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="#">Similarity learning</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../ann/">Approximate nearest-neighbors</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../diffusion/">Diffusion harmonics</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../fuzzy/">Fuzzy simplicial sets</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cknn/">Continuous k-nearest-neighbors</a>
+                </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmark</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Fast Laplacian Eigenmaps</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API &raquo;</li>
+        
+      
+    
+    <li>Laplacian Eigenmaps</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <div class="doc doc-object doc-function">
+
+
+
+<h2 id="fastlapmap.spectral.LapEigenmap" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">fastlapmap</span><span class="o">.</span><span class="n">spectral</span><span class="o">.</span><span class="n">LapEigenmap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_eigs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">efC</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">efS</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">similarity</span><span class="o">=</span><span class="s1">&#39;diffusion&#39;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm_laplacian</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eigen_tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">return_evals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.6875</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+      <p>Performs <a href="https://www2.imm.dtu.dk/projects/manifold/Papers/Laplacian.pdf">Laplacian Eigenmaps</a> on the input data.</p>
+<hr />
+<h4 id="fastlapmap.spectral.LapEigenmap--parameters">Parameters</h4>
+<p><code>data</code> : numpy.ndarray, pandas.DataFrame or scipy.sparse.csr_matrix Input data. By default will use nmslib for
+approximate nearest-neighbors, which works both on numpy arrays and sparse matrices (faster and cheaper option).
+ Alternatively, users can provide a precomputed affinity matrix by stating <code>metric='precomputed'</code>.</p>
+<p><code>n_eigs</code> : int (optional, default 10).
+ Number of eigenvectors to decompose the graph Laplacian into.</p>
+<p><code>k</code> : int (optional, default 10).
+    Number of k-nearest-neighbors to use when computing affinities.</p>
+<p><code>metric</code> : str (optional, default 'euclidean').
+    which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
+    Accepted metrics include:
+    -'sqeuclidean'
+    -'euclidean'
+    -'l1'
+    -'lp' - requires setting the parameter <code>p</code> - equivalent to minkowski distance
+    -'cosine'
+    -'angular'
+    -'negdotprod'
+    -'levenshtein'
+    -'hamming'
+    -'jaccard'
+    -'jansen-shan'</p>
+<p><code>M</code> : int (optional, default 10).
+    defines the maximum number of neighbors in the zero and above-zero layers during HSNW
+    (Hierarchical Navigable Small World Graph). However, the actual default maximum number
+    of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
+    is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
+    HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.</p>
+<p><code>efC</code> : int (optional, default 20).
+    A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
+    and leads to higher accuracy of search. However this also leads to longer indexing times.
+    A reasonable range for this parameter is 10-500.</p>
+<p><code>efS</code> : int (optional, default 100).
+    A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
+    expense of longer retrieval time. A reasonable range for this parameter is 10-500.</p>
+<p><code>n_jobs</code> : int (optional, default 1)
+    How many threads to use in approximate-nearest-neighbors computation.</p>
+<p><code>similarity</code> : str (optional, default 'diffusion').
+    Which algorithm to use for similarity learning. Options are diffusion harmonics ('diffusion')
+    , fuzzy simplicial sets ('fuzzy') and continuous k-nearest-neighbors ('cknn').</p>
+<p><code>norm_laplacian</code> : bool (optional, default True).
+    Whether to renormalize the graph Laplacian.</p>
+<p><code>return_evals</code> : bool (optional, default False).
+    Whether to also return the eigenvalues in a tuple of eigenvectors, eigenvalues. Defaults to False.</p>
+<p><code>verbose</code> : bool (optional, default False).
+    Whether to report information on the current progress of the algorithm.</p>
+<hr />
+<h4 id="fastlapmap.spectral.LapEigenmap--returns">Returns</h4>
+<pre><code>* If return_evals is True :
+    A tuple of eigenvectors and eigenvalues.
+* If return_evals is False :
+    An array of ranked eigenvectors.
+</code></pre>
+
+        <details class="quote">
+          <summary>Source code in <code>fastlapmap/spectral.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">LapEigenmap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">n_eigs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span>
+                <span class="n">efC</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                <span class="n">efS</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                <span class="n">M</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">similarity</span><span class="o">=</span><span class="s1">&#39;diffusion&#39;</span><span class="p">,</span>
+                <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">norm_laplacian</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">eigen_tol</span><span class="o">=</span><span class="mf">10e-4</span><span class="p">,</span>
+                <span class="n">return_evals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">p</span><span class="o">=</span><span class="mi">11</span><span class="o">/</span><span class="mi">16</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs [Laplacian Eigenmaps](https://www2.imm.dtu.dk/projects/manifold/Papers/Laplacian.pdf) on the input data.</span>
+
+<span class="sd">    ----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    `data` : numpy.ndarray, pandas.DataFrame or scipy.sparse.csr_matrix Input data. By default will use nmslib for</span>
+<span class="sd">    approximate nearest-neighbors, which works both on numpy arrays and sparse matrices (faster and cheaper option).</span>
+<span class="sd">     Alternatively, users can provide a precomputed affinity matrix by stating `metric=&#39;precomputed&#39;`.</span>
+
+<span class="sd">    `n_eigs` : int (optional, default 10).</span>
+<span class="sd">     Number of eigenvectors to decompose the graph Laplacian into.</span>
+
+<span class="sd">    `k` : int (optional, default 10).</span>
+<span class="sd">        Number of k-nearest-neighbors to use when computing affinities.</span>
+
+<span class="sd">    `metric` : str (optional, default &#39;euclidean&#39;).</span>
+<span class="sd">        which metric to use when computing neighborhood distances. Defaults to &#39;euclidean&#39;.</span>
+<span class="sd">        Accepted metrics include:</span>
+<span class="sd">        -&#39;sqeuclidean&#39;</span>
+<span class="sd">        -&#39;euclidean&#39;</span>
+<span class="sd">        -&#39;l1&#39;</span>
+<span class="sd">        -&#39;lp&#39; - requires setting the parameter `p` - equivalent to minkowski distance</span>
+<span class="sd">        -&#39;cosine&#39;</span>
+<span class="sd">        -&#39;angular&#39;</span>
+<span class="sd">        -&#39;negdotprod&#39;</span>
+<span class="sd">        -&#39;levenshtein&#39;</span>
+<span class="sd">        -&#39;hamming&#39;</span>
+<span class="sd">        -&#39;jaccard&#39;</span>
+<span class="sd">        -&#39;jansen-shan&#39;</span>
+
+<span class="sd">    `M` : int (optional, default 10).</span>
+<span class="sd">        defines the maximum number of neighbors in the zero and above-zero layers during HSNW</span>
+<span class="sd">        (Hierarchical Navigable Small World Graph). However, the actual default maximum number</span>
+<span class="sd">        of neighbors for the zero layer is 2*M.  A reasonable range for this parameter</span>
+<span class="sd">        is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.</span>
+<span class="sd">        HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.</span>
+
+<span class="sd">    `efC` : int (optional, default 20).</span>
+<span class="sd">        A &#39;hnsw&#39; parameter. Increasing this value improves the quality of a constructed graph</span>
+<span class="sd">        and leads to higher accuracy of search. However this also leads to longer indexing times.</span>
+<span class="sd">        A reasonable range for this parameter is 10-500.</span>
+
+<span class="sd">    `efS` : int (optional, default 100).</span>
+<span class="sd">        A &#39;hnsw&#39; parameter. Similarly to efC, increasing this value improves recall at the</span>
+<span class="sd">        expense of longer retrieval time. A reasonable range for this parameter is 10-500.</span>
+
+<span class="sd">    `n_jobs` : int (optional, default 1)</span>
+<span class="sd">        How many threads to use in approximate-nearest-neighbors computation.</span>
+
+<span class="sd">    `similarity` : str (optional, default &#39;diffusion&#39;).</span>
+<span class="sd">        Which algorithm to use for similarity learning. Options are diffusion harmonics (&#39;diffusion&#39;)</span>
+<span class="sd">        , fuzzy simplicial sets (&#39;fuzzy&#39;) and continuous k-nearest-neighbors (&#39;cknn&#39;).</span>
+
+<span class="sd">    `norm_laplacian` : bool (optional, default True).</span>
+<span class="sd">        Whether to renormalize the graph Laplacian.</span>
+
+<span class="sd">    `return_evals` : bool (optional, default False).</span>
+<span class="sd">        Whether to also return the eigenvalues in a tuple of eigenvectors, eigenvalues. Defaults to False.</span>
+
+<span class="sd">    `verbose` : bool (optional, default False).</span>
+<span class="sd">        Whether to report information on the current progress of the algorithm.</span>
+
+<span class="sd">    ----------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">        * If return_evals is True :</span>
+<span class="sd">            A tuple of eigenvectors and eigenvalues.</span>
+<span class="sd">        * If return_evals is False :</span>
+<span class="sd">            An array of ranked eigenvectors.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">csr_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data should be a numpy.ndarray,pandas.DataFrame or&#39;</span>
+                     <span class="s1">&#39;a scipy.sparse.csr_matrix for obtaining approximate nearest neighbors with </span><span class="se">\&#39;</span><span class="s1">nmslib</span><span class="se">\&#39;</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s1">&#39;precomputed&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s1">&#39;diffusion&#39;</span><span class="p">:</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">diffusion_harmonics</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s1">&#39;fuzzy&#39;</span><span class="p">:</span>
+            <span class="n">fuzzy_results</span> <span class="o">=</span> <span class="n">fuzzy_simplicial_set_ann</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">fuzzy_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s1">&#39;cknn&#39;</span><span class="p">:</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">cknn_graph</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_adj</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># Enforce symmetry</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">W</span> <span class="o">+</span> <span class="n">W</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">laplacian</span><span class="p">,</span> <span class="n">dd</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csgraph</span><span class="o">.</span><span class="n">laplacian</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="n">norm_laplacian</span><span class="p">,</span>
+                                      <span class="n">return_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">laplacian</span> <span class="o">=</span> <span class="n">_set_diag</span><span class="p">(</span><span class="n">laplacian</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">norm_laplacian</span><span class="p">)</span>
+
+    <span class="n">laplacian</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">n_eigs</span> <span class="o">=</span> <span class="n">n_eigs</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">evals</span><span class="p">,</span> <span class="n">evecs</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">laplacian</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">n_eigs</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">eigen_tol</span><span class="p">)</span>
+    <span class="n">evecs</span> <span class="o">=</span> <span class="n">evecs</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">n_eigs</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">norm_laplacian</span><span class="p">:</span>
+        <span class="c1"># recover u = D^-1/2 x from the eigenvector output x</span>
+        <span class="n">evecs</span> <span class="o">=</span> <span class="n">evecs</span> <span class="o">/</span> <span class="n">dd</span>
+    <span class="n">evecs</span> <span class="o">=</span> <span class="n">evecs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">n_eigs</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">if</span> <span class="n">return_evals</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">evecs</span><span class="p">,</span> <span class="n">evals</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">evecs</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../ann/" class="btn btn-neutral float-right" title="Approximate nearest-neighbors">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../usage/" class="btn btn-neutral" title="Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../usage/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../ann/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
