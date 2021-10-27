@@ -12,15 +12,14 @@ Performs several times faster than the default [scikit-learn implementation](htt
 
 You'll need NMSlib for using this package properly. Installing it with no binaries is recommended if your CPU supports
  advanced instructions (it problably does): 
-
 ```
 pip3 install --no-binary :all: nmslib
-# Along with requirements:
+```
+Along with requirements:
+```
 pip3 install numpy pandas scipy scikit-learn 
 ```
-
 Then you can install this package with pip:
-
 ```
 pip3 install fastlapmap
 ```
@@ -71,6 +70,67 @@ plt.show()
 ![](figs/Embedding_comparison.png)
 
 As we can see, results are nearly identical.
+
+# Parameters
+
+`data` : numpy.ndarray, pandas.DataFrame or scipy.sparse.csr_matrix Input data. By default will use nmslib for
+    approximate nearest-neighbors, which works both on numpy arrays and sparse matrices (faster and cheaper option).
+     Alternatively, users can provide a precomputed affinity matrix by stating `metric='precomputed'`.
+
+`n_eigs` : int (optional, default 10).
+     Number of eigenvectors to decompose the graph Laplacian into.
+
+`k` : int (optional, default 10).
+        Number of k-nearest-neighbors to use when computing affinities.
+
+`metric` : str (optional, default 'euclidean').
+        which metric to use when computing neighborhood distances. Defaults to 'euclidean'.
+        Accepted metrics include:
+        -'sqeuclidean'
+        -'euclidean'
+        -'l1'
+        -'lp' - requires setting the parameter `p` - equivalent to minkowski distance
+        -'cosine'
+        -'angular'
+        -'negdotprod'
+        -'levenshtein'
+        -'hamming'
+        -'jaccard'
+        -'jansen-shan'
+
+`M` : int (optional, default 10).
+        defines the maximum number of neighbors in the zero and above-zero layers during HSNW
+        (Hierarchical Navigable Small World Graph). However, the actual default maximum number
+        of neighbors for the zero layer is 2*M.  A reasonable range for this parameter
+        is 5-100. For more information on HSNW, please check https://arxiv.org/abs/1603.09320.
+        HSNW is implemented in python via NMSlib. Please check more about NMSlib at https://github.com/nmslib/nmslib.
+
+`efC` : int (optional, default 20).
+        A 'hnsw' parameter. Increasing this value improves the quality of a constructed graph
+        and leads to higher accuracy of search. However this also leads to longer indexing times.
+        A reasonable range for this parameter is 10-500.
+
+`efS` : int (optional, default 100).
+        A 'hnsw' parameter. Similarly to efC, increasing this value improves recall at the
+        expense of longer retrieval time. A reasonable range for this parameter is 10-500.
+
+`n_jobs` : int (optional, default 1)
+        How many threads to use in approximate-nearest-neighbors computation.
+
+`similarity` : str (optional, default 'diffusion').
+        Which algorithm to use for similarity learning. Options are diffusion harmonics ('diffusion')
+        , fuzzy simplicial sets ('fuzzy') and continuous k-nearest-neighbors ('cknn').
+
+`norm_laplacian` : bool (optional, default True).
+        Whether to renormalize the graph Laplacian.
+
+`return_evals` : bool (optional, default False).
+        Whether to also return the eigenvalues in a tuple of eigenvectors, eigenvalues. Defaults to False.
+
+`verbose` : bool (optional, default False).
+        Whether to report information on the current progress of the algorithm.
+
+
 
 # Benchmark
 

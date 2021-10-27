@@ -8,9 +8,7 @@
 import numpy as np
 import pandas as pd
 from scipy import sparse
-from scipy.sparse import csr_matrix
 from fastlapmap.similarities import fuzzy_simplicial_set_ann, cknn_graph, diffusion_harmonics
-from fastlapmap.ann import NMSlibTransformer
 
 def LapEigenmap(data,
                 n_eigs=10,
@@ -99,24 +97,25 @@ def LapEigenmap(data,
             An array of ranked eigenvectors.
 
     """
-    N = np.shape(data)[0]
     if isinstance(data, np.ndarray):
-        data = csr_matrix(data)
+        data = sparse.csr_matrix(data)
     elif isinstance(data, pd.DataFrame):
         data = data.to_numpy()
-        data = csr_matrix(data)
+        data = sparse.csr_matrix(data)
+    elif isinstance(data, sparse.csr_matrix):
+        pass
     else:
         return print('Data should be a numpy.ndarray,pandas.DataFrame or'
                      'a scipy.sparse.csr_matrix for obtaining approximate nearest neighbors with \'nmslib\'.')
 
     if metric != 'precomputed':
         if similarity == 'diffusion':
-            W = diffusion_harmonics(data, n_neighbors=k, metric=metric, n_jobs=n_jobs)
+            W = diffusion_harmonics(data, n_neighbors=k, metric=metric, efC=efC, efS=efS, M=M, p=p, n_jobs=n_jobs, verbose=verbose)
         elif similarity == 'fuzzy':
-            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, metric=metric, n_jobs=n_jobs)
+            fuzzy_results = fuzzy_simplicial_set_ann(data, n_neighbors=k, metric=metric, efC=efC, efS=efS, M=M, p=p, n_jobs=n_jobs, verbose=verbose)
             W = fuzzy_results[0]
         elif similarity == 'cknn':
-            W = cknn_graph(data, n_neighbors=k,metric=metric, n_jobs=n_jobs, include_self=True, is_sparse=True, return_adj=False)
+            W = cknn_graph(data, n_neighbors=k, metric=metric, n_jobs=n_jobs, efC=efC, efS=efS, M=M, include_self=True, is_sparse=True, return_adj=False)
         # Enforce symmetry
         W = (W + W.T) / 2
 
