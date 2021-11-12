@@ -69,7 +69,9 @@ plt.show()
 ```
 ![](figs/Embedding_comparison.png)
 
-As we can see, results are nearly identical.
+As we can see, results are nearly identical. Qualitatively, fastlapmap embeddings seem to better
+separate distinct digits than the default
+[scikit-learn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.spectral_embedding.html).
 
 # Parameters
 
@@ -164,3 +166,8 @@ runtime_benchmark(data,
 
 As you can see, the diffusion harmoics model is the fastest, followed closely by fuzzy simplicial sets. Both outperform 
 scikit-learn default implementation and escalate linearly with sample size.
+
+
+# License
+MIT License
+2021, Davi Sidarta-Oliveira
